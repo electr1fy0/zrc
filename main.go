@@ -68,6 +68,7 @@ func (C *Config) PrintAliases() {
 	}
 	strData := string(data)
 	cnt := 1
+	fmt.Println("Aliases:")
 	for line := range strings.Lines(strData) {
 		if aliasLine, found := strings.CutPrefix(line, "alias "); found == true {
 			fmt.Printf("%d. %s\n", cnt, strings.TrimSpace(aliasLine))
@@ -79,6 +80,7 @@ func (C *Config) PrintAliases() {
 
 func main() {
 	args := os.Args
+
 	if len(args) < 3 {
 		fmt.Println("usage :\n\t- zrc add <line_to_add_to_shell_config>\n\t- zrc list aliases")
 		os.Exit(0)
@@ -89,7 +91,19 @@ func main() {
 		os.Exit(1)
 	}
 
-	path := filepath.Join(home, "Downloads/zsc.txt")
+	var shell string
+	appConfigPath := filepath.Join(home, ".zrcc")
+
+	data, err := os.ReadFile(appConfigPath)
+	if err != nil {
+		fmt.Println("enter your shell config file name (e.g. .zshrc)")
+		fmt.Scanln(&shell)
+		os.WriteFile(appConfigPath, []byte(shell), 0644)
+	} else {
+		shell = string(data)
+	}
+
+	path := filepath.Join(home, shell)
 	var config Config
 	config.Parse(path)
 	var line string
