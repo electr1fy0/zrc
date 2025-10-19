@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -39,7 +38,7 @@ func (C *Config) Parse(path string) {
 }
 
 func (C *Config) AddLine(line string) {
-	C.Contents += "\n" + line
+	C.Contents += line + "\n"
 	if err := os.WriteFile(C.Path, []byte(C.Contents), 0644); err != nil {
 		fmt.Println("error writing file:", err)
 		os.Exit(1)
@@ -147,8 +146,6 @@ func main() {
 	var config Config
 	config.Parse(path)
 
-	cmd := exec.Command("source ", path)
-
 	switch args[1] {
 	case "add":
 		if len(args) < 3 {
@@ -157,7 +154,6 @@ func main() {
 		}
 		line := strings.Join(args[2:], " ")
 		config.AddLine(line)
-		err = cmd.Run()
 
 	case "alias":
 		if len(args) < 4 {
@@ -171,11 +167,9 @@ func main() {
 			name := args[3]
 			command := strings.Join(args[4:], " ")
 			config.AddAlias(name, command)
-			err = cmd.Run()
 		case "remove":
 			name := args[3]
 			config.RemoveAlias(name)
-			err = cmd.Run()
 		default:
 			fmt.Println("unknown alias command:", args[2])
 		}
@@ -191,11 +185,9 @@ func main() {
 		case "add":
 			dir := args[3]
 			config.AddToPath(dir)
-			err = cmd.Run()
 		case "remove":
 			dir := args[3]
 			config.RemoveFromPath(dir)
-			err = cmd.Run()
 		default:
 			fmt.Println("unknown path command:", args[2])
 		}
@@ -210,8 +202,4 @@ func main() {
 	default:
 		fmt.Println("unknown command:", args[1])
 	}
-	if err != nil {
-		fmt.Println("Error refreshing terminal based on config")
-	}
-
 }
